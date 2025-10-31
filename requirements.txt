@@ -1,0 +1,10 @@
+protobuf>=3.20,<6
+streamlit==1.41.1
+pydantic<2
+openai==0.27.0
+langchain==0.0.113
+faiss-cpu==1.7.4
+tiktoken
+unstructured
+sqlalchemy==1.4.54
+dataclasses-json==0.5.14
