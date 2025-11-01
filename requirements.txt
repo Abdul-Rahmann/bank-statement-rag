@@ -8,3 +8,5 @@ tiktoken
 unstructured
 sqlalchemy==1.4.54
 dataclasses-json==0.5.14
+pdfplumber-0.11.7
+wordninja-2.0.0
