@@ -1,12 +1,20 @@
-protobuf>=3.20,<6
-streamlit==1.41.1
-pydantic<2
-openai==0.27.0
-langchain==0.0.113
-faiss-cpu==1.7.4
-tiktoken
-unstructured
-sqlalchemy==1.4.54
-dataclasses-json==0.5.14
-pdfplumber-0.11.7
-wordninja-2.0.0
+# Core dependencies
+pandas>=2.0.0
+pdfplumber>=0.10.0
+wordninja>=2.0.0
+
+# Vector store and embeddings
+faiss-cpu>=1.7.4
+langchain>=0.1.0
+langchain-openai>=0.0.5
+langchain-community>=0.0.20
+
+# OpenAI
+openai>=1.0.0
+
+# Streamlit and visualizations
+streamlit>=1.29.0
+plotly>=5.18.0
+
+# Optional utilities
+python-dotenv>=1.0.0
