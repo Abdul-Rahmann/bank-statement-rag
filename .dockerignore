@@ -1,0 +1,38 @@
+# Ignore local development artifacts
+.git
+.gitignore
+.venv
+venv
+__pycache__
+
+# Python build and dependency artifacts
+*.pyc
+*.egg-info/
+dist/
+build/
+pip-wheel-metadata/
+
+# Jupyter/Editor artifacts
+.ipynb_checkpoints
+.vscode
+.idea
+*.swp
+*~
+
+# Environment files (especially sensitive ones)
+.env
+*.env
+config.yaml  # If it contains secrets or local-only configurations
+
+# Data/Cache files (crucial to keep images small)
+data/
+datasets/
+models/
+embeddings/
+vectorstore/
+local_data/
+cache/
+.streamlit/  # Streamlit local config/cache
+
+# Example of specific files to ignore
+streamlit_app.local.py # Local testing file

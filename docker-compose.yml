@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bank-rag-bot
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./data:/app/data
+      - ./config.yml:/app/config.yml:ro
+      - ./.env:/app/.env:ro
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - bank-rag-network
+
+networks:
+  bank-rag-network:
+    driver: bridge
+

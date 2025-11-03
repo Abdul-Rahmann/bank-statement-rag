@@ -1,4 +1,4 @@
-# Bank Statement RAG Bot
+## Bank Statement RAG Bot
 
 A smart chatbot that analyzes your bank statements and provides insights on your transactions using AI. Built with Python, LangChain, OpenAI GPT models, and FAISS for efficient vector search.
 
@@ -95,11 +95,38 @@ A smart chatbot that analyzes your bank statements and provides insights on your
    OPENAI_API_KEY=your-openai-api-key-here
    ```
 
-2. **Run**
+2. **Create `config.yml`** (see Local Setup for full config)
+
+3. **Place PDFs in data/raw/**
    ```bash
-   docker compose up --build
+   mkdir -p data/raw
+   cp /path/to/statements/*.pdf data/raw/
    ```
-   Access at [http://localhost:8501](http://localhost:8501)
+
+4. **Build and run**
+   ```bash
+   docker compose build
+   docker compose up -d
+   ```
+
+5. **Access the app**
+   - Streamlit: [http://localhost:8501](http://localhost:8501)
+   - Logs: `docker compose logs -f`
+
+**Useful Docker commands:**
+```bash
+# Stop
+docker compose down
+
+# Restart
+docker compose restart
+
+# Run CLI inside container
+docker compose exec app python cli.py --query "Your question"
+
+# Force refresh
+docker compose exec app python cli.py --refresh
+```
 
 ---
 
