@@ -1,6 +1,7 @@
 """Data Processing Module Cleans, enriches, and categorizes transaction data"""
 
 import pandas as pd
+from src.config import get_config_value
 
 
 def categorize_transaction(description):
@@ -9,23 +10,7 @@ def categorize_transaction(description):
         return 'other'
 
     desc_lower = description.lower()
-
-    # Customize these categories based on user spending patterns
-    categories = {
-        'groceries': ['grocery', 'instacart', 'safeway', 'walmart', 'superstore', 'sobeys', 'loblaws', 'whole foods',
-                      'metro'],
-        'dining': ['restaurant', 'cafe', 'coffee', 'starbucks', 'tim hortons', 'mcdonalds', 'burger', 'pizza', 'subway',
-                   'wendy'],
-        'shopping': ['amazon', 'amzn', 'ebay', 'store', 'retail'],
-        'transportation': ['uber', 'lyft', 'gas', 'petro', 'shell', 'esso', 'transit', 'parking', 'taxi'],
-        'utilities': ['hydro', 'electric', 'gas bill', 'water', 'internet', 'phone', 'rogers', 'bell', 'telus', 'shaw'],
-        'entertainment': ['netflix', 'spotify', 'disney', 'cinema', 'theatre', 'game', 'steam', 'playstation', 'xbox'],
-        'health': ['pharmacy', 'medical', 'dental', 'doctor', 'hospital', 'clinic', 'shoppers drug'],
-        'fitness': ['gym', 'fitness', 'yoga', 'crossfit', 'goodlife', 'planet fitness', 'anytime fitness', 'membership',
-                    'workout'],
-        'office': ['staples', 'office', 'supplies'],
-        'transfer': ['transfer', 'e-transfer', 'interac'],
-    }
+    categories = get_config_value('CATEGORIES')
 
     for category, keywords in categories.items():
         if any(keyword in desc_lower for keyword in keywords):

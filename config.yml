@@ -1,5 +1,20 @@
-DATA_DIR: data/raw
-VECTORS_DIR: vectorstore
-PROCESSED_DIR: data/processed
-TRANSACTIONS_CSV: data/processed/transactions.csv
-OPENAI_API_KEY: ${OPENAI_API_KEY}
+CATEGORIES:
+  groceries: [grocery, instacart, safeway, walmart, superstore, sobeys, loblaws, whole foods, metro]
+  dining: [restaurant, cafe, coffee, starbucks, tim hortons, mcdonalds, burger, pizza, subway, wendy]
+  shopping: [amazon, amzn, ebay, store, retail]
+  transportation: [uber, lyft, gas, petro, shell, esso, transit, parking, taxi]
+  utilities: [hydro, electric, gas bill, water, internet, phone, rogers, bell, telus, shaw]
+  entertainment: [netflix, spotify, disney, cinema, theatre, game, steam, playstation, xbox]
+  health: [pharmacy, medical, dental, doctor, hospital, clinic, shoppers drug]
+  fitness: [gym, fitness, yoga, crossfit, goodlife, planet fitness, anytime fitness, membership, workout]
+  office: [staples, office, supplies]
+  transfer: [transfer, e-transfer, interac]
+
+PATHS:
+  DATA_DIR: data/raw
+  VECTORS_DIR: data/vectors/vectorstore
+  PROCESSED_DIR: data/processed
+  TRANSACTIONS_CSV: data/processed/transactions.csv
+
+SECRETS:
+  OPENAI_API_KEY: ${OPENAI_API_KEY}

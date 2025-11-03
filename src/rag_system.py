@@ -30,11 +30,11 @@ class BankStatementRAG:
         force_refresh: If True, re - extract PDFs and rebuild vector store
         """
         self.config = config
-        self.openai_api_key = config['OPENAI_API_KEY']
-        self.pdf_dir = config.get('DATA_DIR', 'data/raw')
-        self.processed_dir = config.get('PROCESSED_DIR', 'data/processed')
-        self.vector_store_path = config.get('VECTORS_DIR', 'data/vectors')
-        self.transactions_csv = os.path.join(self.processed_dir, 'transactions.csv')
+        self.openai_api_key = config['SECRETS'].get('OPENAI_API_KEY')
+        self.pdf_dir = config['PATHS'].get('DATA_DIR')
+        self.processed_dir = config['PATHS'].get('PROCESSED_DIR')
+        self.vector_store_path = config['PATHS'].get('VECTORS_DIR')
+        self.transactions_csv = config['PATHS'].get('TRANSACTIONS_CSV')
 
         os.makedirs(self.processed_dir, exist_ok=True)
         os.makedirs(self.vector_store_path, exist_ok=True)
@@ -75,7 +75,7 @@ class BankStatementRAG:
 
         # Check if we have data
         if len(self.transactions_df) == 0:
-            print("\\n  WARNING: No transactions found!")
+            print("\n  WARNING: No transactions found!")
             print(f"   Make sure your PDF files are in: {self.pdf_dir}")
             print("   Force refresh with: BankStatementRAG(config, force_refresh=True)")
             return

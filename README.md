@@ -43,13 +43,33 @@ A smart chatbot that analyzes your bank statements and provides insights on your
    Create `config.yml`:
    ```yaml
    # Bank Statement RAG Configuration
-   OPENAI_API_KEY: ${OPENAI_API_KEY}  # Or put your key directly
-   DATA_DIR: data/raw
-   PROCESSED_DIR: data/processed
-   VECTORS_DIR: data/vectors
+   
+   # Categories for transaction classification
+   CATEGORIES:
+     groceries: [grocery, instacart, safeway, walmart, superstore]
+     dining: [restaurant, cafe, coffee, starbucks, tim hortons]
+     shopping: [amazon, amzn, ebay, store, retail]
+     transportation: [uber, lyft, gas, petro, shell, transit]
+     utilities: [hydro, electric, water, internet, phone, rogers, bell]
+     entertainment: [netflix, spotify, disney, cinema, theatre, game]
+     health: [pharmacy, medical, dental, doctor, hospital, clinic]
+     fitness: [gym, fitness, yoga, crossfit, membership, workout]
+     office: [staples, office, supplies]
+     transfer: [transfer, e-transfer, interac]
+   
+   # Data paths
+   PATHS:
+     DATA_DIR: data/raw
+     VECTORS_DIR: data/vectors/vectorstore
+     PROCESSED_DIR: data/processed
+     TRANSACTIONS_CSV: data/processed/transactions.csv
+   
+   # API Keys (use environment variables)
+   SECRETS:
+     OPENAI_API_KEY: ${OPENAI_API_KEY}
    ```
    
-   And create `.env` file (recommended for security):
+   Create `.env` file (recommended for security):
    ```bash
    OPENAI_API_KEY=your-openai-api-key-here
    ```
@@ -207,16 +227,26 @@ bank-statement-rag/
 
 ### Adding Categories
 
-Edit `src/processing.py`:
+Categories are now configured in `config.yml`:
 
-```python
-categories = {
-    'your_category': ['keyword1', 'keyword2'],
-    'groceries': ['grocery', 'instacart', 'safeway'],
-    'fitness': ['gym', 'yoga', 'crossfit'],
-    # ... add more
-}
+```yaml
+CATEGORIES:
+  your_category: [keyword1, keyword2, keyword3]
+  groceries: [grocery, instacart, safeway, walmart]
+  # ... add more
 ```
+
+Simply add your custom category and keywords to the YAML file. The system will automatically use them for categorization.
+
+**Example: Adding a "pets" category**
+```yaml
+CATEGORIES:
+  pets: [petsmart, petco, vet, veterinary, pet food]
+  groceries: [grocery, instacart, safeway]
+  # ... other categories
+```
+
+No code changes needed - just update the config and run `python cli.py --refresh` to re-categorize transactions.
 
 ### Changing AI Model
 
@@ -237,6 +267,18 @@ def extract_transactions_from_page(lines, extracted_year):
     # Customize based on your PDF structure
     # Adjust regex patterns and parsing logic
     ...
+```
+
+### Changing Data Paths
+
+Update paths in `config.yml`:
+
+```yaml
+PATHS:
+  DATA_DIR: custom/path/to/pdfs
+  VECTORS_DIR: custom/path/to/vectors
+  PROCESSED_DIR: custom/path/to/processed
+  TRANSACTIONS_CSV: custom/path/to/transactions.csv
 ```
 
 ### Adding Chart Types
@@ -268,7 +310,8 @@ def create_your_custom_chart(df):
 
 **Empty results:**
 - Force refresh to re-categorize: `python cli.py --refresh`
-- Check category keywords in `src/processing.py`
+- Check category keywords in `config.yml` under `CATEGORIES`
+- Add missing merchants to relevant categories
 - Verify transactions are being extracted correctly
 
 **Import errors:**
