@@ -1,7 +1,0 @@
-{
-  "OPENAI_API_KEY": "API_KEY",
-  "DATA_DIR": "data/chequing",
-  "VECTORS_DIR": "vectorstore",
-  "PROCESSED_DIR": "data/processed",
-  "TRANSACTIONS_CSV": "data/processed/transactions.csv"
-}

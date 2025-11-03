@@ -2,9 +2,15 @@
 Settings Page
 System configuration and data management
 """
+import sys
+from pathlib import Path
+
+root_dir = Path(__file__).parent.parent.resolve()
+sys.path.append(str(root_dir))
 
 import streamlit as st
-from streamlit_app.utils import load_config, initialize_rag
+from streamlit_app.utils import initialize_rag
+from src.config import get_config
 
 
 def render():
@@ -13,7 +19,7 @@ def render():
 
     st.subheader("System Configuration")
 
-    config = load_config()
+    config = get_config()
     if config:
         st.json(config)
 

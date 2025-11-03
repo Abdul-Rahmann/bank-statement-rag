@@ -1,0 +1,5 @@
+DATA_DIR: data/raw
+VECTORS_DIR: vectorstore
+PROCESSED_DIR: data/processed
+TRANSACTIONS_CSV: data/processed/transactions.csv
+OPENAI_API_KEY: ${OPENAI_API_KEY}

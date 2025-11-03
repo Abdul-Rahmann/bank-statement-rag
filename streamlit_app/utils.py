@@ -3,25 +3,22 @@ Utility Functions
 Helper functions for the Streamlit app
 """
 
-import json
-import os
+import sys
 import streamlit as st
+from pathlib import Path
+
+root_dir = Path(__file__).parent.parent.parent.resolve()
+sys.path.append(str(root_dir))
+
 from src.rag_system import BankStatementRAG
-
-
-def load_config():
-    """Load configuration from file."""
-    if os.path.exists('config.json'):
-        with open('config.json') as f:
-            return json.load(f)
-    return None
+from src.config import get_config
 
 
 def initialize_rag(force_refresh=False):
     """Initialize the RAG system."""
-    config = load_config()
+    config = get_config()
     if config is None:
-        st.error("Config file not found. Please create config.json")
+        st.error("Config file not found. Please create config.yml in the root directory of the project.")
         return False
 
     try:

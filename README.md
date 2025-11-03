@@ -40,14 +40,18 @@ A smart chatbot that analyzes your bank statements and provides insights on your
    ```
 
 2. **Configure**
-   Create `config.json`:
-   ```json
-   {
-     "OPENAI_API_KEY": "your-openai-api-key-here",
-     "DATA_DIR": "data/raw",
-     "PROCESSED_DIR": "data/processed",
-     "VECTORS_DIR": "data/vectors"
-   }
+   Create `config.yml`:
+   ```yaml
+   # Bank Statement RAG Configuration
+   OPENAI_API_KEY: ${OPENAI_API_KEY}  # Or put your key directly
+   DATA_DIR: data/raw
+   PROCESSED_DIR: data/processed
+   VECTORS_DIR: data/vectors
+   ```
+   
+   And create `.env` file (recommended for security):
+   ```bash
+   OPENAI_API_KEY=your-openai-api-key-here
    ```
 
 3. **Add PDFs and run**
@@ -189,10 +193,11 @@ bank-statement-rag/
 │   └── vectors/           # FAISS vector store
 ├── cli.py                 # Command-line interface
 ├── streamlit_app.py       # Streamlit launcher
+├── config.yml             # Configuration file (YAML)
+├── .env                   # Environment variables (API keys)
 ├── Dockerfile             
 ├── docker-compose.yaml    
 ├── requirements.txt       
-├── config.json            
 └── README.md             
 ```
 
@@ -254,6 +259,12 @@ def create_your_custom_chart(df):
 - Ensure PDFs are in `data/raw/`
 - Run `python cli.py --refresh`
 - Check PDF format matches extraction logic in `src/extraction.py`
+
+**Config file errors:**
+- Ensure `config.yml` exists in root directory
+- Check YAML syntax (no tabs, proper indentation)
+- Verify environment variables in `.env` file
+- Test with: `python -c "from src.config import get_config; print(get_config())"`
 
 **Empty results:**
 - Force refresh to re-categorize: `python cli.py --refresh`
