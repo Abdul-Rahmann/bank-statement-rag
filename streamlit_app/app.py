@@ -12,16 +12,17 @@ from streamlit_app.pages import dashboard, chat, transactions, settings
 def render_sidebar():
     """Render the sidebar."""
     with st.sidebar:
-        st.title("Bank Statement RAG Bot")
+        st.title("Financial Assistant")
         st.markdown("---")
 
         if st.session_state.rag is None:
-            if st.button("Initialize System", type="primary"):
-                if initialize_rag():
-                    st.success("System initialized!")
-                    st.rerun()
+            if st.button("Start Assistant", type="primary"):
+                with st.spinner("Starting your AI assistant..."):
+                    if initialize_rag():
+                        st.success("Assistant started successfully!")
+                        st.rerun()
         else:
-            st.success("System Ready")
+            st.success("Assistant Working...")
 
             if st.session_state.transactions_df is not None:
                 stats = st.session_state.rag.get_stats()
@@ -34,31 +35,27 @@ def render_sidebar():
 
         st.markdown("### About")
         st.markdown("""
-                This application uses AI to analyze your bank statements and provide insights.
+                This is your personal **AI financial assistant**, designed to help you manage your bank transactions and analyze your spending habits.
 
-                **Features:**
-                - Smart categorization
-                - Semantic search
-                - Interactive visualizations
-                - Natural language queries
+                ### Features
+                - Dashboard with insightful visualizations and key metrics  
+                - Chat interface to interact with your assistant  
+                - Transaction history and detailed summaries  
+                - Settings for a personalized experience 
                 """)
 
 
 def main():
     """Main application entry point."""
-    # Setup
     setup_page()
     load_custom_css()
     initialize_session_state()
 
-    # Render sidebar
     render_sidebar()
 
-    # Main content
     if st.session_state.rag is None:
-        st.info("Please initialize the system using the sidebar.")
+        st.info("Please initialize your AI financial assistant using the init button on the sidebar.")
     else:
-        # Tabs
         tab1, tab2, tab3, tab4 = st.tabs(["Dashboard", "Chat", "Transactions", "Settings"])
 
         with tab1:
