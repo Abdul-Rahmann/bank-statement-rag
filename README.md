@@ -4,6 +4,11 @@ A smart chatbot that analyzes your bank statements and provides insights on your
 
 ---
 
+### Demo / Preview
+
+![Demo of AI Bot](assets/rag-dashboard.png)
+---
+
 ## Features
 
 - **PDF Extraction**: Automatically extracts transactions from bank statement PDFs
@@ -32,7 +37,7 @@ A smart chatbot that analyzes your bank statements and provides insights on your
 
 1. **Clone and setup**
    ```bash
-   git clone <your-repo-url>
+   git clone https://github.com/Abdul-Rahmann/bank-statement-rag.git
    cd bank-statement-rag
    python -m venv venv
    source venv/bin/activate  # Windows: venv\Scripts\activate
