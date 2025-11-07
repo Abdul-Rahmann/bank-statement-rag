@@ -4,6 +4,7 @@ Query Engine Module Handles both structured and semantic queries
 
 import pandas as pd
 from datetime import datetime, timedelta
+from src.config import get_config, get_config_value
 
 def query_structured_data(query: str, df: pd.DataFrame) -> str:
     """
@@ -38,18 +39,7 @@ def query_structured_data(query: str, df: pd.DataFrame) -> str:
 
     # Filter by category
     category = None
-    category_keywords = {
-        'groceries': ['groceries', 'grocery', 'food shopping'],
-        'dining': ['dining', 'restaurant', 'eating out', 'food'],
-        'shopping': ['shopping', 'retail'],
-        'transportation': ['transportation', 'transport', 'gas', 'fuel', 'uber', 'taxi'],
-        'utilities': ['utilities', 'utility', 'bill', 'bills'],
-        'entertainment': ['entertainment', 'streaming', 'movies', 'games'],
-        'health': ['health', 'medical', 'pharmacy', 'medicine'],
-        'fitness': ['fitness', 'gym', 'workout', 'exercise', 'membership'],
-        'office': ['office', 'supplies'],
-        'transfer': ['transfer', 'transfers']
-    }
+    category_keywords = get_config_value('CATEGORIES')
 
     for cat, keywords in category_keywords.items():
         if any(keyword in query_lower for keyword in keywords):
