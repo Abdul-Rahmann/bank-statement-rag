@@ -14,7 +14,7 @@ from streamlit_app.charts import (
 
 def render():
     """Render the dashboard page."""
-    st.markdown('<p class="main-header">Dashboard</p>', unsafe_allow_html=True)
+    st.header("Dashboard")
 
     if st.session_state.transactions_df is None:
         st.warning("No data loaded. Please initialize the system first.")

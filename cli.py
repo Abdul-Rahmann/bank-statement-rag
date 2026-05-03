@@ -36,7 +36,7 @@ def main():
     # Load config
     try:
         config = get_config()
-        print("config loaded: ", config, "\n\n")
+        print("✓ Config loaded successfully\n")
     except FileNotFoundError:
         print(f"\nError: Config file not found.")
         return
@@ -51,7 +51,7 @@ def main():
         return
 
     if rag.transactions_df is None or len(rag.transactions_df) == 0:
-        data_dir = get_config_value('DATA_DIR', 'data/raw')
+        data_dir = get_config_value('PATHS.DATA_DIR', 'data/raw')
         print("\nNo data loaded. Please:")
         print(f"   1. Place PDF statements in: {data_dir}")
         print("   2. Run with --refresh flag")

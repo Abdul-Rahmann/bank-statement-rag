@@ -18,11 +18,6 @@ def load_custom_css():
     """Load custom CSS styling."""
     st.markdown("""
     <style>
-        .main-header {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-        }
         .metric-card {
             background-color: #f0f2f6;
             padding: 1rem;

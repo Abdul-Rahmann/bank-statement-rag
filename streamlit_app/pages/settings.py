@@ -10,16 +10,16 @@ sys.path.append(str(root_dir))
 
 import streamlit as st
 from streamlit_app.utils import initialize_rag
-from src.config import get_config
+from src.config import get_safe_config
 
 
 def render():
     """Render the settings page."""
-    st.markdown('<p class="main-header">Settings</p>', unsafe_allow_html=True)
+    st.header("Settings")
 
     st.subheader("System Configuration")
 
-    config = get_config()
+    config = get_safe_config()
     if config:
         st.json(config)
 

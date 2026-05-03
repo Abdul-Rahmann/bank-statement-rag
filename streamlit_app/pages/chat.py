@@ -9,7 +9,7 @@ from streamlit_app.charts import generate_chart_for_query
 
 def render():
     """Render the chat page."""
-    st.markdown('<p class="main-header">Chat Assistant</p>', unsafe_allow_html=True)
+    st.header("Chat Assistant")
 
     if st.session_state.rag is None:
         st.warning("Please initialize the system first.")

@@ -31,6 +31,12 @@ class BankStatementRAG:
         """
         self.config = config
         self.openai_api_key = config['SECRETS'].get('OPENAI_API_KEY')
+        if not self.openai_api_key:
+            raise ValueError(
+                "OPENAI_API_KEY is missing or empty. "
+                "Set it in your .env file or environment variables."
+            )
+
         self.pdf_dir = config['PATHS'].get('DATA_DIR')
         self.processed_dir = config['PATHS'].get('PROCESSED_DIR')
         self.vector_store_path = config['PATHS'].get('VECTORS_DIR')
@@ -56,7 +62,7 @@ class BankStatementRAG:
             try:
                 temp_df = pd.read_csv(self.transactions_csv)
                 csv_has_data = len(temp_df) > 0
-            except:
+            except Exception:
                 csv_has_data = False
 
         needs_extraction = force_refresh or not csv_has_data
@@ -91,9 +97,12 @@ class BankStatementRAG:
             )
             print("   ✓ Vector store loaded")
 
-        # Setup agent
-        self._setup_agent()
-        print("\nRAG system ready!\n")
+        # Setup agent only if we have data
+        if self.transactions_df is not None and len(self.transactions_df) > 0:
+            self._setup_agent()
+            print("\nRAG system ready!\n")
+        else:
+            print("\nRAG system initialized without agent (no transaction data).\n")
 
 
     def _extract_and_process(self):

@@ -9,7 +9,7 @@ from datetime import datetime
 
 def render():
     """Render the transactions page."""
-    st.markdown('<p class="main-header">Transaction Browser</p>', unsafe_allow_html=True)
+    st.header("Transaction Browser")
 
     if st.session_state.transactions_df is None:
         st.warning("No data loaded. Please initialize the system first.")
