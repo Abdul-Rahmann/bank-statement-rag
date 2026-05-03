@@ -1,22 +1,23 @@
 """Data Processing Module Cleans, enriches, and categorizes transaction data"""
 
+import re
+import numpy as np
 import pandas as pd
 from src.config import get_config_value
 
 
-def categorize_transaction(description):
-    """Categorize transactions based on merchant/description."""
-    if pd.isna(description):
-        return 'other'
-
-    desc_lower = description.lower()
-    categories = get_config_value('CATEGORIES')
+def _categorize_transactions(descriptions, categories):
+    """Vectorized categorization of transaction descriptions."""
+    desc_lower = descriptions.str.lower()
+    conditions = []
+    choices = []
 
     for category, keywords in categories.items():
-        if any(keyword in desc_lower for keyword in keywords):
-            return category
+        pattern = '|'.join(re.escape(kw) for kw in keywords)
+        conditions.append(desc_lower.str.contains(pattern, regex=True, na=False))
+        choices.append(category)
 
-    return 'other'
+    return np.select(conditions, choices, default='other')
 
 
 def process_transactions(df):
@@ -31,14 +32,15 @@ def process_transactions(df):
 
     # Add computed columns
     df['Amount'] = df['Withdrawals ($)'] + df['Deposits ($)']
-    df['Type'] = df.apply(lambda x: 'Deposit' if x['Deposits ($)'] > 0 else 'Withdrawal', axis=1)
+    df['Type'] = np.where(df['Deposits ($)'] > 0, 'Deposit', 'Withdrawal')
     df['Month'] = df['Date'].dt.to_period('M')
     df['Week'] = df['Date'].dt.to_period('W')
     df['Year'] = df['Date'].dt.year
     df['DayOfWeek'] = df['Date'].dt.day_name()
 
-    # Add categories
-    df['Category'] = df['Description'].apply(categorize_transaction)
+    # Add categories (vectorized, load config once)
+    categories = get_config_value('CATEGORIES', {})
+    df['Category'] = _categorize_transactions(df['Description'], categories)
 
     # Remove invalid dates
     df = df.dropna(subset=['Date'])

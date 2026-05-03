@@ -4,38 +4,53 @@ from langchain.docstore.document import Document
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 
+
 def create_semantic_documents(transactions_df):
     """
     Create rich, semantic documents for embedding. Each transaction becomes a detailed document.
+    Uses vectorized operations instead of iterrows for better performance.
     """
+    dates = transactions_df['Date']
+    descriptions = transactions_df['Description']
+    withdrawals = transactions_df['Withdrawals ($)']
+    deposits = transactions_df['Deposits ($)']
+    balances = transactions_df['Balance ($)']
+    categories = transactions_df['Category']
+    types = transactions_df['Type']
+    months = transactions_df['Month']
+    weeks = transactions_df['Week']
+    years = transactions_df['Year']
+    day_of_weeks = transactions_df['DayOfWeek']
+
     documents = []
+    for date, desc, wd, dep, bal, cat, typ, mon, week, year, dow in zip(
+        dates, descriptions, withdrawals, deposits, balances,
+        categories, types, months, weeks, years, day_of_weeks
+    ):
+        amount = wd if wd > 0 else dep
+        trans_type = 'spent' if wd > 0 else 'received'
 
-    for idx, row in transactions_df.iterrows():
-        amount = row['Withdrawals ($)'] if row['Withdrawals ($)'] > 0 else row['Deposits ($)']
-        trans_type = 'spent' if row['Withdrawals ($)'] > 0 else 'received'
-
-        # Create natural language description
-        content = f"""
-        Transaction on {row['Date'].strftime('%B %d, %Y')} ({row['DayOfWeek']}):
-        You {trans_type} ${amount: .2f} at {row['Description']}.
-        Category: {row['Category']}
-        Transaction Type: {row['Type']}
-        Balance after transaction: ${row['Balance ($)']: .2f}
-        """
+        content = (
+            f"Transaction on {date.strftime('%B %d, %Y')} ({dow}):\n"
+            f"You {trans_type} ${amount:.2f} at {desc}.\n"
+            f"Category: {cat}\n"
+            f"Transaction Type: {typ}\n"
+            f"Balance after transaction: ${bal:.2f}"
+        )
 
         documents.append(Document(
             page_content=content,
             metadata={
-                'date': row['Date'].strftime('%Y-%m-%d'),
-                'description': row['Description'],
+                'date': date.strftime('%Y-%m-%d'),
+                'description': desc,
                 'amount': float(amount),
-                'category': row['Category'],
-                'type': row['Type'],
-                'balance': float(row['Balance ($)']),
-                'month': str(row['Month']),
-                'week': str(row['Week']),
-                'year': int(row['Year']),
-                'day_of_week': row['DayOfWeek']
+                'category': cat,
+                'type': typ,
+                'balance': float(bal),
+                'month': str(mon),
+                'week': str(week),
+                'year': int(year),
+                'day_of_week': dow
             }
         ))
     return documents

@@ -21,5 +21,14 @@ PATHS:
   PROCESSED_DIR: data/processed
   TRANSACTIONS_CSV: data/processed/transactions.csv
 
+MODEL:
+  name: gpt-4o-mini
+  temperature: 0
+
+EXTRACTION:
+  DEPOSIT_TRIGGERS:
+    - Deposit
+    - MB-Transferfrom
+
 SECRETS:
   OPENAI_API_KEY: ${OPENAI_API_KEY}

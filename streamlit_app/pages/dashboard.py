@@ -10,6 +10,7 @@ from streamlit_app.charts import (
     create_top_merchants_chart,
     create_transaction_heatmap
 )
+from streamlit_app.utils import cached_get_summary_stats
 
 
 def render():
@@ -21,7 +22,7 @@ def render():
         return
 
     df = st.session_state.transactions_df
-    stats = st.session_state.rag.get_stats()
+    stats = cached_get_summary_stats(df)
 
     # Summary metrics
     col1, col2, col3, col4 = st.columns(4)

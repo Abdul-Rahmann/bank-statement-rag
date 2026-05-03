@@ -3,10 +3,12 @@ Chart Creation Functions
 All Plotly chart generation functions
 """
 
+import streamlit as st
 import plotly.express as px
 import plotly.graph_objects as go
 
 
+@st.cache_data(ttl=3600)
 def create_spending_over_time_chart(df, time_period='M'):
     """Create spending over time line chart."""
     df_copy = df.copy()
@@ -59,6 +61,7 @@ def create_spending_over_time_chart(df, time_period='M'):
     return fig
 
 
+@st.cache_data(ttl=3600)
 def create_category_breakdown_chart(df):
     """Create category breakdown pie chart."""
     category_data = df.groupby('Category')['Withdrawals ($)'].sum().reset_index()
@@ -84,6 +87,7 @@ def create_category_breakdown_chart(df):
     return fig
 
 
+@st.cache_data(ttl=3600)
 def create_top_merchants_chart(df, top_n=10):
     """Create top merchants bar chart."""
     merchant_data = df.groupby('Description')['Withdrawals ($)'].sum().reset_index()
@@ -110,6 +114,7 @@ def create_top_merchants_chart(df, top_n=10):
     return fig
 
 
+@st.cache_data(ttl=3600)
 def create_transaction_heatmap(df):
     """Create transaction heatmap by day of week and month."""
     df_copy = df.copy()

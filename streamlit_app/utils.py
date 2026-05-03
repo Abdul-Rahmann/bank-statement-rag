@@ -14,6 +14,13 @@ from src.rag_system import BankStatementRAG
 from src.config import get_config
 
 
+@st.cache_data(ttl=3600)
+def cached_get_summary_stats(df):
+    """Cached wrapper for summary stats to avoid recomputation on every render."""
+    from src.processing import get_summary_stats
+    return get_summary_stats(df)
+
+
 def initialize_rag(force_refresh=False):
     """Initialize the RAG system."""
     config = get_config()

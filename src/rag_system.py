@@ -147,10 +147,13 @@ class BankStatementRAG:
             )
         ]
 
+        model_name = self.config.get('MODEL', {}).get('name', 'gpt-4o-mini')
+        temperature = self.config.get('MODEL', {}).get('temperature', 0)
+
         llm = ChatOpenAI(
-            temperature=0,
+            temperature=temperature,
             openai_api_key=self.openai_api_key,
-            model="gpt-4o-mini"
+            model=model_name
         )
 
         prompt = ChatPromptTemplate.from_messages([

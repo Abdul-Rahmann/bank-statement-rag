@@ -5,7 +5,7 @@ Orchestrates all pages and components
 
 import streamlit as st
 from streamlit_app.config import setup_page, load_custom_css
-from streamlit_app.utils import initialize_session_state, initialize_rag
+from streamlit_app.utils import initialize_session_state, initialize_rag, cached_get_summary_stats
 from streamlit_app.pages import dashboard, chat, transactions, settings
 
 
@@ -25,7 +25,7 @@ def render_sidebar():
             st.success("Assistant Working...")
 
             if st.session_state.transactions_df is not None:
-                stats = st.session_state.rag.get_stats()
+                stats = cached_get_summary_stats(st.session_state.transactions_df)
                 st.markdown("### Quick Stats")
                 st.metric("Transactions", f"{stats['total_transactions']:,}")
                 st.metric("Total Spent", f"${stats['total_spent']:,.2f}")
