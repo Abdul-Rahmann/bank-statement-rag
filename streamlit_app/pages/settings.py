@@ -12,7 +12,11 @@ import streamlit as st  # noqa: E402
 import yaml  # noqa: E402
 
 from src.config import get_config, get_safe_config  # noqa: E402
-from streamlit_app.utils import _save_chat_history, initialize_rag  # noqa: E402
+from streamlit_app.utils import (  # noqa: E402
+    _save_chat_history,
+    _save_chat_messages,
+    initialize_rag,
+)
 
 
 def render():
@@ -121,7 +125,9 @@ def render():
     with col2:
         if st.button("Clear Chat History"):
             st.session_state.chat_history = []
+            st.session_state.chat_messages = []
             _save_chat_history([])
+            _save_chat_messages([])
             st.success("Chat history cleared!")
 
     st.markdown("---")

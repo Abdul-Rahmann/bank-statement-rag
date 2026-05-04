@@ -21,7 +21,7 @@ def _apply_time_filter(df, query_lower):
         month_ago = today - timedelta(days=30)
         return df[df['Date'] >= month_ago], "last month"
     elif 'this month' in query_lower or 'current month' in query_lower:
-        return df[df['Date'].dt.month == today.month], "this month"
+        return df[(df['Date'].dt.month == today.month) & (df['Date'].dt.year == today.year)], "this month"
     elif 'this year' in query_lower or 'current year' in query_lower:
         return df[df['Date'].dt.year == today.year], "this year"
     elif 'last year' in query_lower:
@@ -70,18 +70,26 @@ def _apply_amount_filter(df, query_lower):
     return df.copy()
 
 
+def apply_query_filters(query: str, df: pd.DataFrame) -> tuple[pd.DataFrame, str, str | None]:
+    """
+    Apply all relevant filters (time, category, type, amount) to the DataFrame.
+    Returns (filtered_df, time_period_label, matched_category).
+    """
+    query_lower = query.lower()
+    filtered_df, time_period = _apply_time_filter(df, query_lower)
+    filtered_df, category = _apply_category_filter(filtered_df, query_lower)
+    filtered_df = _apply_type_filter(filtered_df, query_lower)
+    filtered_df = _apply_amount_filter(filtered_df, query_lower)
+    return filtered_df, time_period, category
+
+
 def query_structured_data(query: str, df: pd.DataFrame) -> str:
     """
     Handle structured queries that require aggregations.
     Supports composable time, category, type, and amount filtering.
     """
     query_lower = query.lower()
-
-    # Apply filters cumulatively
-    filtered_df, time_period = _apply_time_filter(df, query_lower)
-    filtered_df, category = _apply_category_filter(filtered_df, query_lower)
-    filtered_df = _apply_type_filter(filtered_df, query_lower)
-    filtered_df = _apply_amount_filter(filtered_df, query_lower)
+    filtered_df, time_period, category = apply_query_filters(query, df)
 
     if filtered_df.empty:
         return f"No transactions found {time_period}" + (f" for {category}" if category else "")
@@ -132,7 +140,7 @@ def _format_total_response(df, time_period, category, query_lower):
     result += "**Top transactions:**\n"
     top_transactions = df.nlargest(5, 'Amount')[['Date', 'Description', 'Amount']]
     for _, row in top_transactions.iterrows():
-        result += f"• {row['Date'].strftime('%b %d, %Y')}: ${row['Amount']:,.2f} at {row['Description']}\\n"
+        result += f"• {row['Date'].strftime('%b %d, %Y')}: ${row['Amount']:,.2f} at {row['Description']}\n"
 
     return result
 

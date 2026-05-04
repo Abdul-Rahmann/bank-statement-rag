@@ -7,6 +7,8 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
+from src.query_engine import apply_query_filters
+
 
 @st.cache_data(ttl=3600)
 def create_spending_over_time_chart(df, time_period='M'):
@@ -141,22 +143,30 @@ def create_transaction_heatmap(df):
 
 
 def generate_chart_for_query(query, df):
-    """Generate appropriate chart based on query keywords."""
+    """Generate appropriate chart based on query keywords.
+
+    Applies the same filters as the structured query engine so charts
+    match the text response.
+    """
+    filtered_df, _, _ = apply_query_filters(query, df)
+    if filtered_df.empty:
+        return None
+
     query_lower = query.lower()
 
     if any(word in query_lower for word in ['category', 'breakdown', 'categories']):
-        return create_category_breakdown_chart(df)
+        return create_category_breakdown_chart(filtered_df)
 
     if any(word in query_lower for word in ['over time', 'trend', 'monthly', 'weekly']):
         if 'week' in query_lower:
-            return create_spending_over_time_chart(df, 'W')
+            return create_spending_over_time_chart(filtered_df, 'W')
         elif 'day' in query_lower:
-            return create_spending_over_time_chart(df, 'D')
+            return create_spending_over_time_chart(filtered_df, 'D')
         else:
-            return create_spending_over_time_chart(df, 'M')
+            return create_spending_over_time_chart(filtered_df, 'M')
 
     if any(word in query_lower for word in ['top', 'most', 'largest', 'biggest']):
         if 'merchant' in query_lower or 'store' in query_lower or 'where' in query_lower:
-            return create_top_merchants_chart(df)
+            return create_top_merchants_chart(filtered_df)
 
     return None

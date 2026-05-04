@@ -4,9 +4,10 @@ Interactive chat interface with the AI assistant
 """
 
 import streamlit as st
+from langchain_core.messages import AIMessage, HumanMessage
 
 from streamlit_app.charts import generate_chart_for_query
-from streamlit_app.utils import _save_chat_history
+from streamlit_app.utils import _save_chat_history, _save_chat_messages
 
 
 def render():
@@ -17,7 +18,7 @@ def render():
         st.warning("Please initialize the system first.")
         return
 
-    # Chat history
+    # Chat history (UI display)
     chat_container = st.container()
 
     with chat_container:
@@ -29,14 +30,20 @@ def render():
 
     # Chat input
     if prompt := st.chat_input("Ask about your transactions..."):
+        # UI history
         st.session_state.chat_history.append({"role": "user", "content": prompt})
+        # Agent memory
+        st.session_state.chat_messages.append(HumanMessage(content=prompt))
 
         with st.chat_message("user"):
             st.markdown(prompt)
 
         with st.chat_message("assistant"):
             with st.spinner("Thinking..."):
-                response = st.session_state.rag.ask(prompt)
+                response = st.session_state.rag.ask(
+                    prompt,
+                    chat_history=st.session_state.chat_messages
+                )
                 st.markdown(response)
 
                 chart = generate_chart_for_query(prompt, st.session_state.transactions_df)
@@ -54,5 +61,9 @@ def render():
                         "content": response
                     })
 
+                # Agent memory
+                st.session_state.chat_messages.append(AIMessage(content=response))
+
         # Persist after assistant responds
         _save_chat_history(st.session_state.chat_history)
+        _save_chat_messages(st.session_state.chat_messages)

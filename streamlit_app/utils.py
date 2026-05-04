@@ -47,6 +47,44 @@ def _save_chat_history(history):
         pass
 
 
+CHAT_MESSAGES_PATH = root_dir / 'data' / 'chat_messages.json'
+
+
+def _load_chat_messages():
+    """Load LangChain chat messages from disk for conversation memory."""
+    if CHAT_MESSAGES_PATH.exists():
+        try:
+            with open(CHAT_MESSAGES_PATH) as f:
+                raw = json.load(f)
+            from langchain_core.messages import AIMessage, HumanMessage
+            messages = []
+            for item in raw[-40:]:
+                if item.get('role') == 'human':
+                    messages.append(HumanMessage(content=item['content']))
+                elif item.get('role') == 'ai':
+                    messages.append(AIMessage(content=item['content']))
+            return messages
+        except Exception:
+            return []
+    return []
+
+
+def _save_chat_messages(messages):
+    """Save LangChain chat messages to disk."""
+    CHAT_MESSAGES_PATH.parent.mkdir(parents=True, exist_ok=True)
+    serializable = []
+    for msg in messages[-40:]:
+        if hasattr(msg, 'type') and msg.type == 'human':
+            serializable.append({'role': 'human', 'content': msg.content})
+        elif hasattr(msg, 'type') and msg.type == 'ai':
+            serializable.append({'role': 'ai', 'content': msg.content})
+    try:
+        with open(CHAT_MESSAGES_PATH, 'w') as f:
+            json.dump(serializable, f)
+    except Exception:
+        pass
+
+
 @st.cache_data(ttl=3600)
 def cached_get_summary_stats(df):
     """Cached wrapper for summary stats to avoid recomputation on every render."""
@@ -81,5 +119,7 @@ def initialize_session_state():
         st.session_state.rag = None
     if 'chat_history' not in st.session_state:
         st.session_state.chat_history = _load_chat_history()
+    if 'chat_messages' not in st.session_state:
+        st.session_state.chat_messages = _load_chat_messages()
     if 'transactions_df' not in st.session_state:
         st.session_state.transactions_df = None

@@ -32,7 +32,7 @@ def create_semantic_documents(transactions_df):
         categories, types, months, weeks, years, day_of_weeks
     ):
         amount = wd if wd > 0 else dep
-        trans_type = 'spent' if wd > 0 else 'received'
+        trans_type = 'spent' if wd > 0 else ('received' if dep > 0 else 'neutral')
 
         content = (
             f"Transaction on {date.strftime('%B %d, %Y')} ({dow}):\n"

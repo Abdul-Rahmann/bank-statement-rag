@@ -170,8 +170,14 @@ class BankStatementRAG:
                 "- Use SemanticSearch for finding specific merchants or transaction details\n"
                 "- Always provide clear, formatted answers with dollar amounts and dates\n"
                 "- Be conversational and helpful\n"
-                "- Use emojis to make responses engaging"
+                "- Only use data returned by the tools. Never invent transactions, amounts, or dates.\n"
+                "- If the data is insufficient or no transactions match the query, say so clearly.\n\n"
+                "Examples:\n"
+                'User: "How much did I spend on groceries?" → Use StructuredQuery\n'
+                'User: "Find my Amazon purchases" → Use SemanticSearch\n'
+                'User: "What were my top 5 expenses?" → Use StructuredQuery'
             )),
+            MessagesPlaceholder(variable_name="chat_history"),
             ("user", "{input}"),
             MessagesPlaceholder(variable_name="agent_scratchpad"),
         ])
@@ -185,12 +191,13 @@ class BankStatementRAG:
         )
 
 
-    def ask(self, question: str) -> str:
+    def ask(self, question: str, chat_history=None) -> str:
         """Ask a question about your bank transactions."""
         if self.agent is None:
             return " System not initialized. No transaction data available."
 
-        result = self.agent.invoke({"input": question})
+        inputs = {"input": question, "chat_history": chat_history or []}
+        result = self.agent.invoke(inputs)
         return result['output']
 
 
