@@ -2,56 +2,86 @@
 Query Engine Module Handles both structured and semantic queries
 """
 
-import pandas as pd
+import re
 from datetime import datetime, timedelta
-from src.config import get_config, get_config_value
+
+import pandas as pd
+
+from src.config import get_config_value
+
+
+def _apply_time_filter(df, query_lower):
+    """Apply time-based filtering. Returns (filtered_df, time_period_label)."""
+    today = datetime.now()
+
+    if 'last week' in query_lower or 'past week' in query_lower:
+        week_ago = today - timedelta(days=7)
+        return df[df['Date'] >= week_ago], "last week"
+    elif 'last month' in query_lower or 'past month' in query_lower:
+        month_ago = today - timedelta(days=30)
+        return df[df['Date'] >= month_ago], "last month"
+    elif 'this month' in query_lower or 'current month' in query_lower:
+        return df[df['Date'].dt.month == today.month], "this month"
+    elif 'this year' in query_lower or 'current year' in query_lower:
+        return df[df['Date'].dt.year == today.year], "this year"
+    elif 'last year' in query_lower:
+        last_year = today.year - 1
+        return df[df['Date'].dt.year == last_year], "last year"
+
+    return df.copy(), "in your records"
+
+
+def _apply_category_filter(df, query_lower):
+    """Apply category-based filtering. Returns (filtered_df, matched_category)."""
+    categories = get_config_value('CATEGORIES', {})
+    for cat, keywords in categories.items():
+        if any(keyword in query_lower for keyword in keywords):
+            return df[df['Category'] == cat], cat
+    return df.copy(), None
+
+
+def _apply_type_filter(df, query_lower):
+    """Apply transaction type filtering (withdrawal/deposit)."""
+    if 'withdrawal' in query_lower or 'spent' in query_lower or 'paid' in query_lower:
+        return df[df['Withdrawals ($)'] > 0]
+    if 'deposit' in query_lower or 'received' in query_lower or 'income' in query_lower:
+        return df[df['Deposits ($)'] > 0]
+    return df.copy()
+
+
+def _apply_amount_filter(df, query_lower):
+    """Apply amount-based filtering from natural language."""
+    under_match = re.search(r'under\s+\$?(\d+(?:\.\d{2})?)', query_lower)
+    over_match = re.search(r'(?:over|above|more than)\s+\$?(\d+(?:\.\d{2})?)', query_lower)
+    between_match = re.search(r'between\s+\$?(\d+(?:\.\d{2})?)\s+and\s+\$?(\d+(?:\.\d{2})?)', query_lower)
+    lt_match = re.search(r'<\s*\$?(\d+(?:\.\d{2})?)', query_lower)
+    gt_match = re.search(r'>\s*\$?(\d+(?:\.\d{2})?)', query_lower)
+
+    if between_match:
+        low, high = float(between_match.group(1)), float(between_match.group(2))
+        return df[(df['Amount'] >= low) & (df['Amount'] <= high)]
+    if under_match or lt_match:
+        threshold = float((under_match or lt_match).group(1))
+        return df[df['Amount'] < threshold]
+    if over_match or gt_match:
+        threshold = float((over_match or gt_match).group(1))
+        return df[df['Amount'] > threshold]
+
+    return df.copy()
+
 
 def query_structured_data(query: str, df: pd.DataFrame) -> str:
     """
     Handle structured queries that require aggregations.
-    Supports time filtering, category filtering, and various aggregation types.
+    Supports composable time, category, type, and amount filtering.
     """
     query_lower = query.lower()
-    today = datetime.now()
 
-    # Filter by time period
-    filtered_df = df.copy()
-    time_period = "in your records"
-
-    if 'last week' in query_lower or 'past week' in query_lower:
-        week_ago = today - timedelta(days=7)
-        filtered_df = df[df['Date'] >= week_ago]
-        time_period = "last week"
-    elif 'last month' in query_lower or 'past month' in query_lower:
-        month_ago = today - timedelta(days=30)
-        filtered_df = df[df['Date'] >= month_ago]
-        time_period = "last month"
-    elif 'this month' in query_lower or 'current month' in query_lower:
-        filtered_df = df[df['Date'].dt.month == today.month]
-        time_period = "this month"
-    elif 'this year' in query_lower or 'current year' in query_lower:
-        filtered_df = df[df['Date'].dt.year == today.year]
-        time_period = "this year"
-    elif 'last year' in query_lower:
-        last_year = today.year - 1
-        filtered_df = df[df['Date'].dt.year == last_year]
-        time_period = "last year"
-
-    # Filter by category
-    category = None
-    category_keywords = get_config_value('CATEGORIES')
-
-    for cat, keywords in category_keywords.items():
-        if any(keyword in query_lower for keyword in keywords):
-            category = cat
-            filtered_df = filtered_df[filtered_df['Category'] == category]
-            break
-
-    # Filter by transaction type
-    if 'withdrawal' in query_lower or 'spent' in query_lower or 'paid' in query_lower:
-        filtered_df = filtered_df[filtered_df['Withdrawals ($)'] > 0]
-    elif 'deposit' in query_lower or 'received' in query_lower or 'income' in query_lower:
-        filtered_df = filtered_df[filtered_df['Deposits ($)'] > 0]
+    # Apply filters cumulatively
+    filtered_df, time_period = _apply_time_filter(df, query_lower)
+    filtered_df, category = _apply_category_filter(filtered_df, query_lower)
+    filtered_df = _apply_type_filter(filtered_df, query_lower)
+    filtered_df = _apply_amount_filter(filtered_df, query_lower)
 
     if filtered_df.empty:
         return f"No transactions found {time_period}" + (f" for {category}" if category else "")

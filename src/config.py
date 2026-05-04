@@ -1,15 +1,16 @@
-import os
 import copy
-import yaml
+import os
 import re
-from dotenv import load_dotenv
-from typing import Dict, Optional, Any
 from pathlib import Path
+from typing import Any
+
+import yaml
+from dotenv import load_dotenv
 
 root_dir = Path(__file__).parent.parent.resolve()
 CONFIG_FILE_PATH = root_dir / 'config.yml'
 
-_config_cache: Optional[Dict] = None
+_config_cache: dict | None = None
 
 
 def _substitute_env_vars(obj):
@@ -35,13 +36,13 @@ def _load_config():
     if _config_cache is None:
         load_dotenv()
         config_path = os.getenv('CONFIG_FILE_PATH', CONFIG_FILE_PATH)
-        with open(config_path, 'r') as f:
+        with open(config_path) as f:
             config = yaml.safe_load(f)
         _config_cache = _substitute_env_vars(config)
     return _config_cache
 
 
-def get_config() -> Dict:
+def get_config() -> dict:
     """Get configuration."""
     return _load_config()
 
@@ -65,7 +66,7 @@ def get_config_value(key: str, default=None) -> Any:
     return config.get(key, default)
 
 
-def get_safe_config() -> Dict:
+def get_safe_config() -> dict:
     """Return a copy of config with SECRETS redacted."""
     config = copy.deepcopy(get_config())
     if 'SECRETS' in config and isinstance(config['SECRETS'], dict):

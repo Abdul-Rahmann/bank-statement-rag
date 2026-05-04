@@ -3,8 +3,9 @@ Transactions Page
 Browse and filter ransactions
 """
 
-import streamlit as st
 from datetime import datetime
+
+import streamlit as st
 
 
 def render():
@@ -36,6 +37,9 @@ def render():
             max_value=df['Date'].max().date()
         )
 
+    # Search
+    search_text = st.text_input("Search descriptions", placeholder="e.g. amazon, grocery, uber...")
+
     # Apply filters
     filtered_df = df.copy()
 
@@ -50,6 +54,11 @@ def render():
             (filtered_df['Date'].dt.date >= date_range[0]) &
             (filtered_df['Date'].dt.date <= date_range[1])
             ]
+
+    if search_text:
+        filtered_df = filtered_df[
+            filtered_df['Description'].str.contains(search_text, case=False, na=False)
+        ]
 
     # Summary
     st.markdown(f"**Showing {len(filtered_df)} of {len(df)} transactions**")

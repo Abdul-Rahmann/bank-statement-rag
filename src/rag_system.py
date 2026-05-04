@@ -3,19 +3,23 @@ RAG System Module
 Main orchestrator that ties everything together
 """
 
+import logging
 import os
-import pandas as pd
-from langchain_openai import ChatOpenAI
-from langchain.tools import Tool
-from langchain.agents import create_openai_functions_agent, AgentExecutor
-from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
 
-from .extraction import extract_all_pdfs
-from .processing import process_transactions, get_summary_stats
+import pandas as pd
+from langchain.agents import AgentExecutor, create_openai_functions_agent
+from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain.tools import Tool
+from langchain_openai import ChatOpenAI
+
 from .embeddings import create_semantic_documents, create_vector_store, load_vector_store
+from .extraction import extract_all_pdfs
+from .processing import get_summary_stats, process_transactions
 from .query_engine import query_structured_data, semantic_search
 
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
+
+logger = logging.getLogger(__name__)
 
 
 class BankStatementRAG:
@@ -71,48 +75,46 @@ class BankStatementRAG:
         )
 
         if needs_extraction:
-            print("Starting fresh extraction from PDFs...")
+            logger.info("Starting fresh extraction from PDFs...")
             self._extract_and_process()
         else:
-            print("Loading existing transactions...")
+            logger.info("Loading existing transactions...")
             self.transactions_df = pd.read_csv(self.transactions_csv)
             self.transactions_df = process_transactions(self.transactions_df)
-            print(f"   ✓ Loaded {len(self.transactions_df)} transactions")
+            logger.info("Loaded %d transactions", len(self.transactions_df))
 
         # Check if we have data
         if len(self.transactions_df) == 0:
-            print("\n  WARNING: No transactions found!")
-            print(f"   Make sure your PDF files are in: {self.pdf_dir}")
-            print("   Force refresh with: BankStatementRAG(config, force_refresh=True)")
+            logger.warning("No transactions found! Make sure PDFs are in: %s", self.pdf_dir)
             return
 
         if needs_vectors:
-            print("Building vector store...")
+            logger.info("Building vector store...")
             self._build_vector_store()
         else:
-            print("Loading existing vector store...")
+            logger.info("Loading existing vector store...")
             self.vectorstore = load_vector_store(
                 self.openai_api_key,
                 self.vector_store_path
             )
-            print("   ✓ Vector store loaded")
+            logger.info("Vector store loaded")
 
         # Setup agent only if we have data
         if self.transactions_df is not None and len(self.transactions_df) > 0:
             self._setup_agent()
-            print("\nRAG system ready!\n")
+            logger.info("RAG system ready!")
         else:
-            print("\nRAG system initialized without agent (no transaction data).\n")
+            logger.warning("RAG system initialized without agent (no transaction data).")
 
 
     def _extract_and_process(self):
         """Extract PDFs and process transactions."""
         raw_df = extract_all_pdfs(self.pdf_dir)
-        print(f"\n✓ Total transactions extracted: {len(raw_df)}")
+        logger.info("Total transactions extracted: %d", len(raw_df))
 
         self.transactions_df = process_transactions(raw_df)
         self.transactions_df.to_csv(self.transactions_csv, index=False)
-        print(f"✓ Processed transactions saved to {self.transactions_csv}")
+        logger.info("Processed transactions saved to %s", self.transactions_csv)
 
 
     def _build_vector_store(self):
@@ -157,18 +159,19 @@ class BankStatementRAG:
         )
 
         prompt = ChatPromptTemplate.from_messages([
-            ("system", """You are a helpful financial assistant analyzing bank transactions.
-    
-            You have access to two powerful tools:
-            1. StructuredQuery: For calculations, aggregations, summaries, and filtering
-            2. SemanticSearch: For finding specific transactions by merchant or description
-    
-            Guidelines:
-            - Use StructuredQuery for "how much", "total", "sum", "average", "breakdown", time periods, or categories
-            - Use SemanticSearch for finding specific merchants or transaction details
-            - Always provide clear, formatted answers with dollar amounts and dates
-            - Be conversational and helpful
-            - Use emojis to make responses engaging"""),
+            ("system", (
+                "You are a helpful financial assistant analyzing bank transactions.\n\n"
+                "You have access to two powerful tools:\n"
+                "1. StructuredQuery: For calculations, aggregations, summaries, and filtering\n"
+                "2. SemanticSearch: For finding specific transactions by merchant or description\n\n"
+                "Guidelines:\n"
+                '- Use StructuredQuery for "how much", "total", "sum", "average", "breakdown", '
+                "time periods, or categories\n"
+                "- Use SemanticSearch for finding specific merchants or transaction details\n"
+                "- Always provide clear, formatted answers with dollar amounts and dates\n"
+                "- Be conversational and helpful\n"
+                "- Use emojis to make responses engaging"
+            )),
             ("user", "{input}"),
             MessagesPlaceholder(variable_name="agent_scratchpad"),
         ])

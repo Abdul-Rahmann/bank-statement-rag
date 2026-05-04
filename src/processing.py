@@ -1,9 +1,14 @@
 """Data Processing Module Cleans, enriches, and categorizes transaction data"""
 
+import logging
 import re
+
 import numpy as np
 import pandas as pd
+
 from src.config import get_config_value
+
+logger = logging.getLogger(__name__)
 
 
 def _categorize_transactions(descriptions, categories):

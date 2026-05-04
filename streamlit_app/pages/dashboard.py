@@ -4,11 +4,12 @@ Main dashboard with visualizations and metrics
 """
 
 import streamlit as st
+
 from streamlit_app.charts import (
-    create_spending_over_time_chart,
     create_category_breakdown_chart,
+    create_spending_over_time_chart,
     create_top_merchants_chart,
-    create_transaction_heatmap
+    create_transaction_heatmap,
 )
 from streamlit_app.utils import cached_get_summary_stats
 
@@ -48,7 +49,6 @@ def render():
         )
 
     with col4:
-        net_color = "normal" if stats['net'] >= 0 else "inverse"
         st.metric(
             label="Net",
             value=f"${stats['net']:,.2f}",
@@ -71,31 +71,47 @@ def render():
     col1, col2 = st.columns(2)
 
     with col1:
-        st.plotly_chart(
-            create_spending_over_time_chart(df, time_period),
-            use_container_width=True,
-            key="dashboard_spending_time"
+        fig1 = create_spending_over_time_chart(df, time_period)
+        st.plotly_chart(fig1, use_container_width=True, key="dashboard_spending_time")
+        st.download_button(
+            label="📥 Download PNG",
+            data=fig1.to_image(format="png", scale=2),
+            file_name="spending_over_time.png",
+            mime="image/png",
+            key="download_spending_time"
         )
 
     with col2:
-        st.plotly_chart(
-            create_category_breakdown_chart(df),
-            use_container_width=True,
-            key="dashboard_category_breakdown"
+        fig2 = create_category_breakdown_chart(df)
+        st.plotly_chart(fig2, use_container_width=True, key="dashboard_category_breakdown")
+        st.download_button(
+            label="📥 Download PNG",
+            data=fig2.to_image(format="png", scale=2),
+            file_name="category_breakdown.png",
+            mime="image/png",
+            key="download_category_breakdown"
         )
 
     col1, col2 = st.columns(2)
 
     with col1:
-        st.plotly_chart(
-            create_top_merchants_chart(df),
-            use_container_width=True,
-            key="dashboard_top_merchants"
+        fig3 = create_top_merchants_chart(df)
+        st.plotly_chart(fig3, use_container_width=True, key="dashboard_top_merchants")
+        st.download_button(
+            label="📥 Download PNG",
+            data=fig3.to_image(format="png", scale=2),
+            file_name="top_merchants.png",
+            mime="image/png",
+            key="download_top_merchants"
         )
 
     with col2:
-        st.plotly_chart(
-            create_transaction_heatmap(df),
-            use_container_width=True,
-            key="dashboard_heatmap"
+        fig4 = create_transaction_heatmap(df)
+        st.plotly_chart(fig4, use_container_width=True, key="dashboard_heatmap")
+        st.download_button(
+            label="📥 Download PNG",
+            data=fig4.to_image(format="png", scale=2),
+            file_name="transaction_heatmap.png",
+            mime="image/png",
+            key="download_heatmap"
         )

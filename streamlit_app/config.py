@@ -5,6 +5,7 @@ Contains all Streamlit configuration and custom CSS
 
 import streamlit as st
 
+
 def setup_page():
     """Configure Streamlit page settings."""
     st.set_page_config(

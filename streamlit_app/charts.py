@@ -3,9 +3,9 @@ Chart Creation Functions
 All Plotly chart generation functions
 """
 
-import streamlit as st
 import plotly.express as px
 import plotly.graph_objects as go
+import streamlit as st
 
 
 @st.cache_data(ttl=3600)

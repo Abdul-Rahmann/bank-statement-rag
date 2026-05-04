@@ -1,8 +1,12 @@
 """Embeddings Module Creates and manages vector embeddings for semantic search """
 
+import logging
+
 from langchain.docstore.document import Document
-from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
+from langchain_openai import OpenAIEmbeddings
+
+logger = logging.getLogger(__name__)
 
 
 def create_semantic_documents(transactions_df):
@@ -57,11 +61,11 @@ def create_semantic_documents(transactions_df):
 
 def create_vector_store(documents, openai_api_key, vector_store_path):
     """Create and save FAISS vector store."""
-    print(f"\nCreating vector embeddings for {len(documents)} transactions...")
+    logger.info("Creating vector embeddings for %d transactions...", len(documents))
     embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
     vectorstore = FAISS.from_documents(documents=documents, embedding=embeddings)
     vectorstore.save_local(vector_store_path)
-    print(f"   ✓ Vector store saved to {vector_store_path}")
+    logger.info("Vector store saved to %s", vector_store_path)
     return vectorstore
 
 def load_vector_store(openai_api_key, vector_store_path):

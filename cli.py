@@ -3,13 +3,16 @@ Command-Line Interface
 Simple CLI for interacting with the RAG system
 """
 
-import argparse, sys
+import argparse
+import sys
 from pathlib import Path
+
 root_dir = Path(__file__).parent.resolve()
 sys.path.append(str(root_dir))
 
-from src.rag_system import BankStatementRAG
-from src.config import get_config, get_config_value
+from src.config import get_config, get_config_value  # noqa: E402
+from src.rag_system import BankStatementRAG  # noqa: E402
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -38,7 +41,7 @@ def main():
         config = get_config()
         print("✓ Config loaded successfully\n")
     except FileNotFoundError:
-        print(f"\nError: Config file not found.")
+        print("\nError: Config file not found.")
         return
     except Exception as e:
         print(f"\nError loading config: {e}")
@@ -60,7 +63,7 @@ def main():
         return
 
     stats = rag.get_stats()
-    print(f"\nAccount Summary:")
+    print("\nAccount Summary:")
     print(f"   • Total transactions: {stats['total_transactions']}")
     print(f"   • Total spent: ${stats['total_spent']:,.2f}")
     print(f"   • Total received: ${stats['total_received']:,.2f}")

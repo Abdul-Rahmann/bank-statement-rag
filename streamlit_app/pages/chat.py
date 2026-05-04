@@ -4,7 +4,9 @@ Interactive chat interface with the AI assistant
 """
 
 import streamlit as st
+
 from streamlit_app.charts import generate_chart_for_query
+from streamlit_app.utils import _save_chat_history
 
 
 def render():
@@ -51,3 +53,6 @@ def render():
                         "role": "assistant",
                         "content": response
                     })
+
+        # Persist after assistant responds
+        _save_chat_history(st.session_state.chat_history)

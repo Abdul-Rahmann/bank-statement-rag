@@ -3,12 +3,17 @@ PDF Extraction Module
 Extracts transaction data from bank statement PDFs
 """
 
+import logging
 import os
 import re
+
 import pandas as pd
 import pdfplumber
 import wordninja
+
 from src.config import get_config_value
+
+logger = logging.getLogger(__name__)
 
 MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
@@ -117,18 +122,18 @@ def extract_all_pdfs(pdf_directory):
     if not pdf_files:
         raise ValueError(f"No PDF files found in {pdf_directory}")
 
-    print(f"\nFound {len(pdf_files)} PDF files to process...")
+    logger.info("Found %d PDF files to process...", len(pdf_files))
 
     dataframes = []
     for file_name in pdf_files:
         file_path = os.path.join(pdf_directory, file_name)
-        print(f"   Processing: {file_name}")
+        logger.info("Processing: %s", file_name)
         try:
             transactions = process_single_pdf(file_path)
             dataframes.append(transactions)
-            print(f"✓ Extracted {len(transactions)} transactions")
+            logger.info("Extracted %d transactions from %s", len(transactions), file_name)
         except Exception as e:
-            print(f"✗ Error processing {file_name}: {e}")
+            logger.error("Error processing %s: %s", file_name, e)
 
     if dataframes:
         all_transactions = pd.concat(dataframes, ignore_index=True)

@@ -4,9 +4,10 @@ Orchestrates all pages and components
 """
 
 import streamlit as st
-from streamlit_app.config import setup_page, load_custom_css
-from streamlit_app.utils import initialize_session_state, initialize_rag, cached_get_summary_stats
-from streamlit_app.pages import dashboard, chat, transactions, settings
+
+from streamlit_app.config import load_custom_css, setup_page
+from streamlit_app.pages import chat, dashboard, settings, transactions
+from streamlit_app.utils import cached_get_summary_stats, initialize_rag, initialize_session_state
 
 
 def render_sidebar():
@@ -38,10 +39,10 @@ def render_sidebar():
                 This is your personal **AI financial assistant**, designed to help you manage your bank transactions and analyze your spending habits.
 
                 ### Features
-                - Dashboard with insightful visualizations and key metrics  
-                - Chat interface to interact with your assistant  
-                - Transaction history and detailed summaries  
-                - Settings for a personalized experience 
+                - Dashboard with insightful visualizations and key metrics
+                - Chat interface to interact with your assistant
+                - Transaction history and detailed summaries
+                - Settings for a personalized experience
                 """)
 
 
